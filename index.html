@@ -105,9 +105,11 @@
             
         }
 
-        .mapboxgl-popup {
-            max-width: 200px;
+        #leg {
+        width: 500px;
+        height: 500px;
         }
+
     </style>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
 </head>
@@ -235,9 +237,7 @@
                 link.className = 'inactive';
 
                 /* Adding Map Legends */
-
                 var legend = document.getElementById('mapLegend');
-
                 div= document.createElement('div');
                 div.innerHTML = '<span><img src="dot.png">Hospital</span>';
                 legend.appendChild(div);
@@ -264,10 +264,11 @@
                     if (visibility === 'visible') {
                         map.setLayoutProperty(clickedLayer, 'visibility', 'none');
                         this.className = '';
-                        document.getElementById('mapLegend');
+                        document.getElementById("mapLegend").style.visibility = "hidden";
+                        
                     } else { //otherise, it will be turned on.
                         this.className = 'active';
-                        document.getElementById('mapLegend');
+                        document.getElementById("mapLegend").style.visibility = "visible";
                         map.setLayoutProperty(
                             clickedLayer,
                             'visibility',
