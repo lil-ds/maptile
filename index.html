@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Map Design</title>
+    <title>Geographic Map Tiles</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css" rel="stylesheet">
@@ -65,16 +65,69 @@
         #menu a.active:hover {
             background: #3074a4;
         }
+
+        #title {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin-top: 20px;
+            margin-left: 20px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 25pt;
+            color: white
+        }
+
+        #mapLegend {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 110px;
+            background: #fff;
+            margin-right: 20px;
+            margin-bottom: 40px;
+            padding: 10px 10px 10px 10px;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        #mapLegend div {
+            height: 50px;
+            line-height: 25px;
+            font-size: 15pt;
+            
+        }
+        #mapLegend div img {
+            float: left;
+            margin-right: 10px;
+        }
+        #mapLegend h2 {
+            text-align: center
+            
+        }
+
+        .mapboxgl-popup {
+            max-width: 200px;
+        }
+        
+
     </style>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
 </head>
 
 <body>
+    <div id="title">
+        Tile Maps
+    </div>
+    <div id="mapLegend">
+        <h2>Legend</h2>
+    </div>
+
+    
     <nav id="menu"></nav>
     <div id='map'></div>
     <script type="text/javascript">
         mapboxgl.accessToken =
-            'pk.eyJ1IjoiamFrb2J6aGFvIiwiYSI6ImNpcms2YWsyMzAwMmtmbG5icTFxZ3ZkdncifQ.P9MBej1xacybKcDN_jehvw';
+            'pk.eyJ1IjoibGlsbGx5MDIiLCJhIjoiY2xkZ2o4dTA1MHh1MTNxcjhjbmxucGZjZSJ9.ODEhxh5a5B_as4sMO9Z73w';
         let map = new mapboxgl.Map({
             container: 'map', // container ID
             style: 'mapbox://styles/mapbox/dark-v10',
@@ -84,40 +137,76 @@
 
         map.on('load', () => { //simplifying the function statement: arrow with brackets to define a function
 
-            map.addSource('uw-tiles', {
+            map.addSource('basemap', {
                 'type': 'raster',
                 'tiles': [
-                    'assets/uw/{z}/{x}/{y}.png'
+                    'assets/basemap/{z}/{x}/{y}.png'
                 ],
                 'tileSize': 256,
-                'attribution': 'Map tiles designed by Bo Zhao</a>'
+                'attribution': 'Map tiles designed by Lily Shen</a>'
             });
 
-            map.addSource('lgbtq-tiles', {
+            map.addSource('hospitals', {
                 'type': 'raster',
                 'tiles': [
-                    'assets/lgbtq/{z}/{x}/{y}.png'
+                    'assets/hospitals/{z}/{x}/{y}.png'
                 ],
                 'tileSize': 256,
-                'attribution': 'Map tiles designed by Bo Zhao'
+                'attribution': 'Map tiles designed by Lily Shen</a>'
+            });
+
+            map.addSource('tile3', {
+                'type': 'raster',
+                'tiles': [
+                    'assets/tile3/{z}/{x}/{y}.png'
+                ],
+                'tileSize': 256,
+                'attribution': 'Map tiles designed by Lily Shen</a>'
+            });
+
+            map.addSource('themed', {
+                'type': 'raster',
+                'tiles': [
+                    'assets/thememap/{z}/{x}/{y}.png'
+                ],
+                'tileSize': 256,
+                'attribution': 'Map tiles designed by Lily Shen</a>'
             });
 
             map.addLayer({
-                'id': 'uw',
+                'id': 'base',
                 'type': 'raster',
                 'layout': {
                     'visibility': 'none'
                 },
-                'source': 'uw-tiles'
+                'source': 'basemap'
             });
 
             map.addLayer({
-                'id': 'lgbtq',
+                'id': 'hosp',
                 'type': 'raster',
                 'layout': {
                     'visibility': 'none'
                 },
-                'source': 'lgbtq-tiles'
+                'source': 'hospitals'
+            });
+
+            map.addLayer({
+                'id': 'combined',
+                'type': 'raster',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'source': 'tile3'
+            });
+
+            map.addLayer({
+                'id': 'tile4',
+                'type': 'raster',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'source': 'themed'
             });
 
         });
@@ -126,12 +215,12 @@
         // After the last frame rendered before the map enters an "idle" state.
         map.on('idle', () => {
             // If these two layers were not added to the map, abort
-            if (!map.getLayer('uw') || !map.getLayer('lgbtq')) {
+            if (!map.getLayer('base') || !map.getLayer('hosp') || !map.getLayer('combined') || !map.getLayer('tile4')) {
                 return;
             }
 
             // Enumerate ids of the layers.
-            const toggleableLayerIds = ['uw', 'lgbtq'];
+            const toggleableLayerIds = ['base', 'hosp', 'combined', 'tile4'];
 
             // Set up the corresponding toggle button for each layer.
             for (const id of toggleableLayerIds) {
@@ -147,6 +236,14 @@
                 link.textContent = id;
                 link.className = 'inactive';
 
+                /* Adding Map Legends */
+
+                var legend = document.getElementById('mapLegend');
+
+                div= document.createElement('div');
+                div.innerHTML = '<span><img src="dot.png">Hospital</span>';
+                legend.appendChild(div);
+
                 // Show or hide layer when the toggle is clicked.
                 link.onclick = function (e) {
                     const clickedLayer = this.textContent;
@@ -158,7 +255,7 @@
                     // for instance, clicks on links are still processed. If you want to stop those behaviors, 
                     // see the preventDefault() method.
                     e.stopPropagation();
-
+                    
                     const visibility = map.getLayoutProperty(
                         clickedLayer,
                         'visibility'
@@ -169,8 +266,10 @@
                     if (visibility === 'visible') {
                         map.setLayoutProperty(clickedLayer, 'visibility', 'none');
                         this.className = '';
+                        document.getElementById('mapLegend');
                     } else { //otherise, it will be turned on.
                         this.className = 'active';
+                        document.getElementById('mapLegend');
                         map.setLayoutProperty(
                             clickedLayer,
                             'visibility',
